@@ -1,5 +1,3 @@
-#test 1
-
 import sys
 import pygame
 import time
@@ -9,13 +7,13 @@ import random
 
 pygame.init()
 
-size = width, height = 640, 480
-#size = width, height = 1600, 900
+#size = width, height = 640, 480
+size = width, height = 1920, 1080
 black = 0, 0, 0
 white = 255, 255, 255
 
-#screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+#screen = pygame.display.set_mode((width, height))
 
 sysfont = pygame.font.SysFont(None , 40)
 text = sysfont.render("Health = "+str(100),True,(255,255,255))
@@ -150,40 +148,27 @@ class Bullet:
 		if self.type == 1: normalammo -= 1
 		if self.type == 2: laserammo -= 1
 
-
-	   # self.fire()
-
 	def checkdelete(self):
 		if self.bposx >width or self.bposx<0 or self.bposy > height or self.bposy < 0:
 			bullets.remove(self)
 
 	def draw(self):
 		global angle
-		'''
-		old=shiprect.center
-		new_ship=pygame.transform.rotate(ship,angle)
-		shiprect = new_ship.get_rect()
-		shiprect.center=old
-		screen.blit(new_ship, (x,y))
-		'''
 		if self.type==1:
 			screen.blit(bullet_img, (self.bposx,self.bposy))
 
 		if self.type==2:
-			#self.old_r=self.r.center
 			self.new_l=pygame.transform.rotate(laser_img,self.angle)
-			#self.r=self.new_l.get_rect()
-			#self.r.center=old
 			screen.blit(self.new_l, (self.bposx,self.bposy))
 		
 	def move(self):
 		self.bposx=self.bposx+self.bvx*20
 		self.bposy=self.bposy+self.bvy*20
 
-	for i in range(0):
+	for i in range(25):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
-	for i in range(0):
+	for i in range(10):
 		consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
 
 
@@ -199,17 +184,14 @@ while 1:
 	time.sleep(1/FPS)
 	angle=angle+anglev
 
-	#if health > 100: health = 100
+	if health > 100: health = 100
+
 	if health <= 0: sys.exit()
 
 	if angle >= 360:
 		angle -= (angle%360)*360
 
-	
-	
-	#print(1)
 	for event in pygame.event.get():
-		#print(2)
 		if event.type == pygame.QUIT: 
 			sys.exit()
 		if event.type == pygame.KEYDOWN:
@@ -224,13 +206,11 @@ while 1:
 				if normalammo > 0:
 					bullets.append(Bullet(x,y,1,angle))
 					pygame.mixer.Sound.play(pew)
-					#print("piew")
 
 			if event.key==pygame.K_LSHIFT:
 				if laserammo > 0:
 					bullets.append(Bullet(x,y,2,angle))
 					pygame.mixer.Sound.play(lasersound)
-				#print("piew")
 
 			if event.key==pygame.K_d:
 				anglev=anglev-2
@@ -269,18 +249,12 @@ while 1:
 	if y<0-shiprect[3]:
 		y = height
 		
-	#print(bullets)
-	#old=shiprect.center
 	new_ship=pygame.transform.rotate(ship,angle)
 	shiprect = new_ship.get_rect()
 	shiprect.center = (x,y)
-	#shiprect.center=old
 
 
 	screen.fill(black)
-
-
-	#screen.blit(text,(width/2,height/2))
 
 	for aster in asteroids_list:
 		aster.collisiondetect()
@@ -297,14 +271,11 @@ while 1:
 		consumable.collisiondetect()
 		consumable.draw()
 
-
-	#shiprect = shiprect.move(x,y)
-
 	screen.blit(new_ship, shiprect)
 	print(shiprect)
 	print(angle)
-	pygame.draw.rect(screen,white,shiprect,3)
-	#pygame.draw.rect(screen,white,(0,0,30,30),3)
+	#boundy box ship
+	#pygame.draw.rect(screen,white,shiprect,3)
 
 	helathtext.set_text("Health: "+str(health),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(normalammo),sysfont,white) 
