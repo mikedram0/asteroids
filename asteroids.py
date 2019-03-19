@@ -1,10 +1,9 @@
-#test 1
-
 import sys
 import pygame
 import time
 import math
 import random
+import threading
 
 
 pygame.init()
@@ -13,6 +12,8 @@ size = width, height = 1920, 1080
 #size = width, height = 1600, 900
 black = 0, 0, 0
 white = 255, 255, 255
+
+clock=pygame.time.Clock()
 
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 #screen = pygame.display.set_mode((width, height))
@@ -25,7 +26,6 @@ lasersound=pygame.mixer.Sound("lasersound.wav")
 pygame.mixer.music.load('beat.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.pre_init(44100,-16,1, 1024)
-#pygame.mixer.music.set_volume(0.03)
 laser_img=pygame.image.load("laser.png")
 ship1 = pygame.image.load("starship.png")
 ship2 = pygame.image.load("starship2.png")
@@ -40,24 +40,11 @@ healthpack = pygame.image.load("health_pck_img.png")
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
 ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
 
-
-#shiprect = ship.get_rect()
-#x=width/2
-#y=height/2
-#vx=0
-#vy=0
-#ax =0 
-#ay =0
-#angle=0
-#anglev=0
 FPS=60
 bullets=[]
 asteroids_list=[]
 consumables_list=[]
 textlist = []
-#health = 1000
-#normalammo = 20
-#laserammo = 10
 
 class Player:
 
@@ -175,7 +162,7 @@ class asteroid:
 					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
 		if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
 			player1.health -= self.size*10
-			asteroids_list.remove(self)
+			asteroids_list.remove(self) #BUG
 	def move(self):
 		self.aposx=self.aposx+self.avx
 		self.aposy=self.aposy+self.avy
@@ -242,56 +229,12 @@ ammo2text = Text()
 player1=Player(width/2,height/2)
 
 
-def main():
+def mainf():
 
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT: 
-			sys.exit()
-		if event.type == pygame.KEYDOWN:
-			
-			if event.key==pygame.K_ESCAPE:
-				sys.exit()
+	#secondary()
+	#time.sleep(1/FPS)
+	clock.tick(FPS)
 
-			if event.key==pygame.K_a:
-				player1.anglev=player1.anglev+2
-
-			if event.key==pygame.K_SPACE:
-				if player1.normalammo > 0:
-					bullets.append(Bullet(player1.x,player1.y,1,player1.angle))
-					pygame.mixer.Sound.play(pew)
-					#print("piew")
-
-			if event.key==pygame.K_LSHIFT:
-				if player1.laserammo > 0:
-					bullets.append(Bullet(player1.x,player1.y,2,player1.angle))
-					pygame.mixer.Sound.play(lasersound)
-				#print("piew")
-
-			if event.key==pygame.K_d:
-				player1.anglev=player1.anglev-2
-
-
-			if event.key == pygame.K_w:
-				player1.image = ship2
-				player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
-				player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
-
-				
-		if event.type  == pygame.KEYUP:
-
-			if event.key == pygame.K_a:
-				player1.anglev = 0
-
-			if event.key == pygame.K_d:
-				player1.anglev = 0
-
-			if event.key == pygame.K_w:
-				player1.image = ship1
-				player1.ax = 0
-				player1.ay = 0
-
-
-	time.sleep(1/FPS)
 	screen.fill(black)
 
 	for aster in asteroids_list:
@@ -323,7 +266,61 @@ def main():
 	pygame.display.update()
 
 
+def secondary():
+	for event in pygame.event.get():
+		print(str("q"+" "+str(event)))
+		if event.type == pygame.QUIT:
+			sys.exit()
+		if event.type == pygame.KEYDOWN:
+			
+			if event.key==pygame.K_ESCAPE: 
+				sys.exit()
+
+			if event.key==pygame.K_a:
+				player1.anglev=player1.anglev+2
+
+			if event.key==pygame.K_SPACE:
+				if player1.normalammo > 0:
+					bullets.append(Bullet(player1.x,player1.y,1,player1.angle))
+					pygame.mixer.Sound.play(pew)
+
+			if event.key==pygame.K_LSHIFT:
+				if player1.laserammo > 0:
+					bullets.append(Bullet(player1.x,player1.y,2,player1.angle))
+					pygame.mixer.Sound.play(lasersound)
+
+			if event.key==pygame.K_d:
+				player1.anglev=player1.anglev-2
+
+
+			if event.key == pygame.K_w:
+				player1.image = ship2
+				player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
+				player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
+
+				
+		if event.type  == pygame.KEYUP:
+
+			if event.key == pygame.K_a:
+				player1.anglev = 0
+
+			if event.key == pygame.K_d:
+				player1.anglev = 0
+
+			if event.key == pygame.K_w:
+				player1.image = ship1
+				player1.ax = 0
+				player1.ay = 0
+
+
 while 1:
-	main()
+	t1=threading.Thread(target=mainf)
+	t2=threading.Thread(target=secondary)
+	t1.start()
+	t2.start()
+	t1.join()
+	t2.join()
+
+
 pygame.quit()
 quit()
