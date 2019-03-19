@@ -30,7 +30,7 @@ asteroid_medium = pygame.image.load("medium.png")
 asteroid_large = pygame.image.load("large.png")
 ammobox1 = pygame.image.load("ammo.png")
 ammobox2 = pygame.image.load("laser_ammo_image.png")
-healthpack = pygame.image.load("")
+healthpack = pygame.image.load("health_pck_img.png")
 
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
 ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
@@ -64,6 +64,7 @@ class Consumables:
 	def collisiondetect(self):
 		global normalammo
 		global laserammo
+		global health
 		if x > self.x and x < self.x + self.bbox[2] and y > self.y and y < self.y + self.bbox[3]:
 			if self.type == 1: normalammo += 10
 			if self.type == 2: laserammo += 5
@@ -162,8 +163,8 @@ class Bullet:
 	for i in range(10):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
-	for i in range(3):
-		ammobox_list.append(Ammobox(random.randint(0,width),random.randint(0,height),random.randint(1,2)))
+	for i in range(20):
+		consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
 
 
 
@@ -172,7 +173,7 @@ while 1:
 	time.sleep(1/FPS)
 	angle=angle+anglev
 
-	print(health)
+	if health > 100: health = 100
 	if health <= 0:
 		sys.exit()
 	
@@ -245,8 +246,8 @@ while 1:
 			bullet.move()
 			bullet.draw()
 
-	for consumable in consumable_list:
-		condumable.collisiondetect()
+	for consumable in consumables_list:
+		consumable.collisiondetect()
 		consumable.draw()
 
 
