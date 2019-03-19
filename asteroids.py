@@ -27,7 +27,8 @@ pygame.mixer.music.play(-1)
 pygame.mixer.pre_init(44100,-16,1, 1024)
 #pygame.mixer.music.set_volume(0.03)
 laser_img=pygame.image.load("laser.png")
-ship = pygame.image.load("starship.png")
+ship1 = pygame.image.load("starship.png")
+ship2 = pygame.image.load("starship2.png")
 bullet_img = pygame.image.load("bullet.png")
 asteroid_small = pygame.image.load("small.png")
 asteroid_medium = pygame.image.load("medium.png")
@@ -70,7 +71,7 @@ class Player:
 		self.health = 100
 		self.normalammo = 20
 		self.laserammo = 10
-		self.image = ship
+		self.image = ship1
 		self.angle = 0
 		self.anglev = 0
 		self.rect = self.image.get_rect()
@@ -104,10 +105,10 @@ class Player:
 		if self.health <= 0 : sys.exit()
 
 	def draw(self):
-		self.image=pygame.transform.rotate(ship,player1.angle)
-		self.rect = self.image.get_rect()
+		self.newimage=pygame.transform.rotate(self.image,player1.angle)
+		self.rect = self.newimage.get_rect()
 		self.rect.center = (self.x,self.y)
-		screen.blit(self.image,self.rect)
+		screen.blit(self.newimage,self.rect)
 
 
 
@@ -276,6 +277,7 @@ while 1:
 
 
 			if event.key == pygame.K_w:
+				player1.image = ship2
 				player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
 				player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
 
@@ -289,6 +291,7 @@ while 1:
 				player1.anglev = 0
 
 			if event.key == pygame.K_w:
+				player1.image = ship1
 				player1.ax = 0
 				player1.ay = 0
 			
