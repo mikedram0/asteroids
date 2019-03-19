@@ -1,5 +1,3 @@
-#test 1
-
 import sys
 import pygame
 import time
@@ -9,13 +7,14 @@ import random
 
 pygame.init()
 
-size = width, height = 1920, 1080
+width = 1280
+height = 720
 #size = width, height = 1600, 900
 black = 0, 0, 0
 white = 255, 255, 255
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-#screen = pygame.display.set_mode((width, height))
+#screen = pygame.display.set_mode((width,height), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((width, height))
 
 sysfont = pygame.font.SysFont(None , 40)
 text = sysfont.render("Health = "+str(100),True,(255,255,255))
@@ -41,23 +40,13 @@ astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
 ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
 
 
-#shiprect = ship.get_rect()
-#x=width/2
-#y=height/2
-#vx=0
-#vy=0
-#ax =0 
-#ay =0
-#angle=0
-#anglev=0
+
 FPS=60
 bullets=[]
 asteroids_list=[]
 consumables_list=[]
 textlist = []
-#health = 1000
-#normalammo = 20
-#laserammo = 10
+
 
 class Player:
 
@@ -220,7 +209,9 @@ class Bullet:
 
 		if self.type==2:
 			self.new_l=pygame.transform.rotate(laser_img,self.angle)
-			screen.blit(self.new_l, (self.bposx,self.bposy))
+			rect = self.new_l.get_rect()
+			rect.center = (self.bposx,self.bposy)
+			screen.blit(self.new_l, rect)
 		
 	def move(self):
 		self.bposx=self.bposx+self.bvx*20
@@ -228,7 +219,7 @@ class Bullet:
 
 
 
-for i in range(10):
+for i in range(0):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
 for i in range(10):
@@ -312,14 +303,16 @@ def main():
 	player1.healthcheck()
 	player1.move()
 	player1.draw()
+	pygame.draw.rect(screen,white,player1.rect,3)
 
-	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
+	#helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
+	helathtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y)),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
 	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
 
-	helathtext.draw(200,110) 
-	ammo1text.draw(200,140) 
-	ammo2text.draw(200,170) 
+	helathtext.draw(width/100,10) 
+	ammo1text.draw(width/100,40) 
+	ammo2text.draw(width/100,70) 
 	pygame.display.update()
 
 
