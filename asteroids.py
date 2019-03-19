@@ -226,30 +226,25 @@ class Bullet:
 		self.bposx=self.bposx+self.bvx*20
 		self.bposy=self.bposy+self.bvy*20
 
-	for i in range(10):
+
+
+for i in range(10):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
-	for i in range(10):
-		consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
+for i in range(10):
+	consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
 
 
 helathtext = Text()
 ammo1text = Text()
 ammo2text = Text()
 
+player1=Player(width/2,height/2)
 
-player1 = Player(width/2,height/2)
 
-while 1:
-	#global angle
-	time.sleep(1/FPS)
-	
+def main():
 
-	
-	
-	#print(1)
 	for event in pygame.event.get():
-		#print(2)
 		if event.type == pygame.QUIT: 
 			sys.exit()
 		if event.type == pygame.KEYDOWN:
@@ -294,35 +289,10 @@ while 1:
 				player1.image = ship1
 				player1.ax = 0
 				player1.ay = 0
-			
-
-	#vx += ax
-	#vy += ay
-
-	#x += vx
-	#y += vy
-
-	#if x-shiprect[2]>width:
-	#	x = 0 - shiprect[2]
-	#if x+shiprect[2]<0:
-	#	x = width
-	#if y>height:
-	#	y = 0 - shiprect[3]
-	#if y<0-shiprect[3]:
-	#	y = height
-		
-	#print(bullets)
-	#old=shiprect.center
-	#new_ship=pygame.transform.rotate(ship,angle)
-	#shiprect = new_ship.get_rect()
-	#shiprect.center = (x,y)
-	#shiprect.center=old
 
 
+	time.sleep(1/FPS)
 	screen.fill(black)
-
-
-	#screen.blit(text,(width/2,height/2))
 
 	for aster in asteroids_list:
 		aster.collisiondetect()
@@ -339,18 +309,9 @@ while 1:
 		consumable.collisiondetect()
 		consumable.draw()
 
-
-	#shiprect = shiprect.move(x,y)
-
-
 	player1.healthcheck()
 	player1.move()
 	player1.draw()
-	
-	#print(shiprect)
-	#print(angle)
-	#pygame.draw.rect(screen,white,shiprect,3)
-	#pygame.draw.rect(screen,white,(0,0,30,30),3)
 
 	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
@@ -359,9 +320,10 @@ while 1:
 	helathtext.draw(200,110) 
 	ammo1text.draw(200,140) 
 	ammo2text.draw(200,170) 
-
-
 	pygame.display.update()
 
+
+while 1:
+	main()
 pygame.quit()
 quit()
