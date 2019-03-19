@@ -30,9 +30,10 @@ asteroid_medium = pygame.image.load("medium.png")
 asteroid_large = pygame.image.load("large.png")
 ammobox1 = pygame.image.load("ammo.png")
 ammobox2 = pygame.image.load("laser_ammo_image.png")
+healthpack = pygame.image.load("")
 
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
-ammoboximage = {1:ammobox1 , 2:ammobox2}
+ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
 
 
 shiprect = ship.get_rect()
@@ -45,13 +46,13 @@ anglev=0
 FPS=60
 bullets=[]
 asteroids_list=[]
-ammobox_list=[]
+consumables_list=[]
 health = 100
 normalammo = 20
 laserammo = 10
 
 
-class Ammobox:
+class Consumables:
 
 	def __init__(self,x,y,ammotype):
 		self.x = x
@@ -66,8 +67,9 @@ class Ammobox:
 		if x > self.x and x < self.x + self.bbox[2] and y > self.y and y < self.y + self.bbox[3]:
 			if self.type == 1: normalammo += 10
 			if self.type == 2: laserammo += 5
+			if self.type == 2: health += 20
 
-			ammobox_list.remove(self)
+			consumables_list.remove(self)
 
 	def draw(self):
 		screen.blit(self.image, (self.x,self.y))
@@ -243,9 +245,9 @@ while 1:
 			bullet.move()
 			bullet.draw()
 
-	for ammobox in ammobox_list:
-		ammobox.collisiondetect()
-		ammobox.draw()
+	for consumable in consumable_list:
+		condumable.collisiondetect()
+		consumable.draw()
 
 
 	screen.blit(new_ship, (x,y))
