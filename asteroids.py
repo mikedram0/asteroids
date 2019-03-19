@@ -28,8 +28,11 @@ bullet_img = pygame.image.load("bullet.png")
 asteroid_small = pygame.image.load("small.png")
 asteroid_medium = pygame.image.load("medium.png")
 asteroid_large = pygame.image.load("large.png")
+ammobox1 = pygame.image.load("ammo.png")
+ammobox2 = pygame.image.load("laser_ammo_image.png")
 
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
+ammoboximage = {1:ammobox1 , 2:ammobox2}
 
 
 shiprect = ship.get_rect()
@@ -42,7 +45,33 @@ anglev=0
 FPS=60
 bullets=[]
 asteroids_list=[]
+ammobox_list=[]
 health = 100
+normalammo = 20
+laserammo = 10
+
+
+class Ammobox:
+
+	def __init__(self,x,y,ammotype):
+		self.x = x
+		self.y = y
+		self.type = ammotype 
+		self.image = ammoboximage[self.type]
+		self.bbox = self.image.get_rect()
+
+	def collisiondetect(self):
+		global normalammo
+		global laserammo
+		if x > self.x and x < self.x + self.bbox[2] and y > self.y and y < self.y + self.bbox[3]:
+			if self.type == 1: normalammo += 10
+			if self.type == 2: laserammo += 5
+
+			ammobox_list.remove(self)
+
+	def draw(self):
+		screen.blit(self.image, (self.x,self.y))
+
 
 class asteroid:
 	def __init__(self,x,y,size):
@@ -86,12 +115,19 @@ class asteroid:
 
 class Bullet:
 	def __init__(self,bposx,bposy,typee,angle):
+		global laserammo
+		global normalammo
+
 		self.angle=angle
 		self.bposx=bposx
 		self.bposy=bposy
 		self.bvx=math.sin(angle*3.1415/180 +3.1415) 
 		self.bvy=math.cos(angle*3.1415/180+3.1415)
 		self.type = typee # Type of Bullet , 1 is a normal bullet , 2 is a laser
+		if self.type == 1: normalammo -= 1
+		if self.type == 2: laserammo -= 1
+
+
 	   # self.fire()
 
 	def checkdelete(self):
@@ -124,6 +160,10 @@ class Bullet:
 	for i in range(10):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
+	for i in range(3):
+		ammobox_list.append(Ammobox(random.randint(0,width),random.randint(0,height),random.randint(1,2)))
+
+
 
 while 1:
 	#global angle
@@ -148,13 +188,15 @@ while 1:
 				anglev=anglev+1
 
 			if event.key==pygame.K_SPACE:
-				bullets.append(Bullet(x,y,1,angle))
-				pygame.mixer.Sound.play(pew)
-				#print("piew")
+				if normalammo > 0:
+					bullets.append(Bullet(x,y,1,angle))
+					pygame.mixer.Sound.play(pew)
+					#print("piew")
 
 			if event.key==pygame.K_LSHIFT:
-				bullets.append(Bullet(x,y,2,angle))
-				pygame.mixer.Sound.play(lasersound)
+				if laserammo > 0:
+					bullets.append(Bullet(x,y,2,angle))
+					pygame.mixer.Sound.play(lasersound)
 				#print("piew")
 				
 
@@ -200,6 +242,10 @@ while 1:
 		if bullets.count(bullet):
 			bullet.move()
 			bullet.draw()
+
+	for ammobox in ammobox_list:
+		ammobox.collisiondetect()
+		ammobox.draw()
 
 
 	screen.blit(new_ship, (x,y))
