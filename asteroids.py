@@ -16,6 +16,9 @@ black = 0, 0, 0
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 #screen = pygame.display.set_mode((width, height))
 
+sysfont = pygame.font.SysFont(None , 40)
+text = sysfont.render("WOOT WOOT",True,(255,255,255))
+
 pew=pygame.mixer.Sound("pew.wav")
 lasersound=pygame.mixer.Sound("lasersound.wav")
 pygame.mixer.music.load('beat.mp3')
@@ -234,6 +237,9 @@ while 1:
 
 
 	screen.fill(black)
+
+
+	screen.blit(text,(width/2,height/2))
 
 	for aster in asteroids_list:
 		aster.collisiondetect()
