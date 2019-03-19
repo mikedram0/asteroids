@@ -12,12 +12,13 @@ pygame.init()
 size = width, height = 1920, 1080
 #size = width, height = 1600, 900
 black = 0, 0, 0
+white = 255, 255, 255
 
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 #screen = pygame.display.set_mode((width, height))
 
 sysfont = pygame.font.SysFont(None , 40)
-text = sysfont.render("WOOT WOOT",True,(255,255,255))
+text = sysfont.render("Health = "+str(100),True,(255,255,255))
 
 pew=pygame.mixer.Sound("pew.wav")
 lasersound=pygame.mixer.Sound("lasersound.wav")
@@ -50,9 +51,24 @@ FPS=60
 bullets=[]
 asteroids_list=[]
 consumables_list=[]
+textlist = []
 health = 100
 normalammo = 20
 laserammo = 10
+
+class Text:
+
+	def __init__(self):
+		textlist.append(self)
+
+	def set_text(self,text,font,color):
+		self.text = font.render(text,True,color)
+
+	def draw(self,x,y):
+		screen.blit(self.text,(x,y))		
+
+
+
 
 
 class Consumables:
@@ -71,7 +87,7 @@ class Consumables:
 		if x > self.x and x < self.x + self.bbox[2] and y > self.y and y < self.y + self.bbox[3]:
 			if self.type == 1: normalammo += 10
 			if self.type == 2: laserammo += 5
-			if self.type == 2: health += 20
+			if self.type == 3: health += 20
 
 			consumables_list.remove(self)
 
@@ -170,6 +186,12 @@ class Bullet:
 		consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
 
 
+helathtext = Text()
+ammo1text = Text()
+ammo2text = Text()
+
+
+
 
 while 1:
 	#global angle
@@ -177,8 +199,7 @@ while 1:
 	angle=angle+anglev
 
 	if health > 100: health = 100
-	if health <= 0:
-		sys.exit()
+	if health <= 0: sys.exit()
 	
 	#print(1)
 	for event in pygame.event.get():
@@ -234,12 +255,10 @@ while 1:
 	shiprect.center=old
 
 
-
-
 	screen.fill(black)
 
 
-	screen.blit(text,(width/2,height/2))
+	#screen.blit(text,(width/2,height/2))
 
 	for aster in asteroids_list:
 		aster.collisiondetect()
@@ -258,6 +277,16 @@ while 1:
 
 
 	screen.blit(new_ship, (x,y))
+
+	helathtext.set_text("Health: "+str(health),sysfont,white) 
+	ammo1text.set_text("Bullets: "+str(normalammo),sysfont,white) 
+	ammo2text.set_text("Lasers: "+str(laserammo),sysfont,white) 
+
+	helathtext.draw(200,110) 
+	ammo1text.draw(200,140) 
+	ammo2text.draw(200,170) 
+
+
 	pygame.display.update()
 
 pygame.quit()
