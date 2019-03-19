@@ -15,6 +15,7 @@ white = 255, 255, 255
 
 #screen = pygame.display.set_mode((width,height), pygame.FULLSCREEN)
 screen = pygame.display.set_mode((width, height))
+clock = pygame.time.Clock()
 
 sysfont = pygame.font.SysFont(None , 40)
 text = sysfont.render("Health = "+str(100),True,(255,255,255))
@@ -289,7 +290,7 @@ def main():
 
 
 
-	time.sleep(1/FPS)
+	clock.tick(FPS)
 	screen.fill(black)
 
 	for aster in asteroids_list:
@@ -313,7 +314,7 @@ def main():
 	pygame.draw.rect(screen,white,player1.rect,3)
 
 	#helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
-	helathtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y)),sysfont,white) 
+	helathtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(clock.get_fps()),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
 	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
 
