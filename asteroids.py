@@ -21,6 +21,8 @@ text = sysfont.render("Health = "+str(100),True,(255,255,255))
 
 pew=pygame.mixer.Sound("pew.wav")
 lasersound=pygame.mixer.Sound("lasersound.wav")
+breaksound = pygame.mixer.Sound("break.wav")
+thrustsound = pygame.mixer.Sound("thrust.wav")
 pygame.mixer.music.load('beat.mp3')
 pygame.mixer.music.play(-1)
 pygame.mixer.pre_init(44100,-16,1, 1024)
@@ -158,6 +160,7 @@ class asteroid:
 		for bullet in bullets:
 			if bullet.bposx > self.aposx and bullet.bposx < self.aposx + self.bbox[2] and bullet.bposy > self.aposy and bullet.bposy < self.aposy + self.bbox[3]:
 				asteroids_list.remove(self)
+				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
 				if self.size > 1 and bullet.type == 1:
 					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
@@ -165,6 +168,7 @@ class asteroid:
 		if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
 			player1.health -= self.size*10
 			asteroids_list.remove(self)
+			pygame.mixer.Sound.play(breaksound)
 	def move(self):
 		self.aposx=self.aposx+self.avx
 		self.aposy=self.aposy+self.avy
@@ -219,7 +223,7 @@ class Bullet:
 
 
 
-for i in range(0):
+for i in range(5):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
 for i in range(10):
@@ -266,6 +270,7 @@ def main():
 				player1.image = ship2
 				player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
 				player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
+				pygame.mixer.Sound.play(thrustsound,-1)
 
 				
 		if event.type  == pygame.KEYUP:
@@ -280,6 +285,8 @@ def main():
 				player1.image = ship1
 				player1.ax = 0
 				player1.ay = 0
+				pygame.mixer.Sound.stop(thrustsound)
+
 
 
 	time.sleep(1/FPS)
