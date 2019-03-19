@@ -83,7 +83,8 @@ class asteroid:
 
 
 class Bullet:
-	def __init__(self,bposx,bposy,typee):
+	def __init__(self,bposx,bposy,typee,angle):
+		self.angle=angle
 		self.bposx=bposx
 		self.bposy=bposy
 		self.bvx=math.sin(angle*3.1415/180 +3.1415) 
@@ -109,7 +110,7 @@ class Bullet:
 
 		if self.type==2:
 			#self.old_r=self.r.center
-			self.new_l=pygame.transform.rotate(laser_img,angle)
+			self.new_l=pygame.transform.rotate(laser_img,self.angle)
 			self.r=self.new_l.get_rect()
 			self.r.center=old
 			screen.blit(self.new_l, (self.bposx,self.bposy))
@@ -145,12 +146,12 @@ while 1:
 				anglev=anglev+1
 
 			if event.key==pygame.K_SPACE:
-				bullets.append(Bullet(x,y,1))
+				bullets.append(Bullet(x,y,1,angle))
 				pygame.mixer.Sound.play(pew)
 				#print("piew")
 
 			if event.key==pygame.K_LSHIFT:
-				bullets.append(Bullet(x,y,2))
+				bullets.append(Bullet(x,y,2,angle))
 				pygame.mixer.Sound.play(lasersound)
 				#print("piew")
 				
