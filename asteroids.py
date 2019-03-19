@@ -2,10 +2,10 @@
 
 import sys
 import pygame
+import threading
 import time
 import math
 import random
-
 
 pygame.init()
 
@@ -38,6 +38,7 @@ healthpack = pygame.image.load("health_pck_img.png")
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
 ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
 
+mainloop=True
 
 shiprect = ship.get_rect()
 x=width/2
@@ -123,7 +124,7 @@ class Bullet:
 	def __init__(self,bposx,bposy,typee,angle):
 		global laserammo
 		global normalammo
-
+		self.r=laser_img.get_rect()
 		self.angle=angle
 		self.bposx=bposx
 		self.bposy=bposy
@@ -142,21 +143,14 @@ class Bullet:
 
 	def draw(self):
 		global angle
-		'''
-		old=shiprect.center
-		new_ship=pygame.transform.rotate(ship,angle)
-		shiprect = new_ship.get_rect()
-		shiprect.center=old
-		screen.blit(new_ship, (x,y))
-		'''
 		if self.type==1:
 			screen.blit(bullet_img, (self.bposx,self.bposy))
 
 		if self.type==2:
-			#self.old_r=self.r.center
+			self.old_r=self.r.center
 			self.new_l=pygame.transform.rotate(laser_img,self.angle)
 			self.r=self.new_l.get_rect()
-			self.r.center=old
+			self.r.center=self.old_r
 			screen.blit(self.new_l, (self.bposx,self.bposy))
 		
 	def move(self):
@@ -171,94 +165,92 @@ class Bullet:
 
 
 
-while 1:
-	#global angle
-	time.sleep(1/FPS)
-	angle=angle+anglev
-
-	if health > 100: health = 100
-	if health <= 0:
-		sys.exit()
-	
-	#print(1)
-	for event in pygame.event.get():
-		#print(2)
-		if event.type == pygame.QUIT: 
-			sys.exit()
-		if event.type == pygame.KEYDOWN:
-			
-			if event.key==pygame.K_ESCAPE:
-				sys.exit()
-
-			if event.key==pygame.K_a:
-				anglev=anglev+1
-
-			if event.key==pygame.K_SPACE:
-				if normalammo > 0:
-					bullets.append(Bullet(x,y,1,angle))
-					pygame.mixer.Sound.play(pew)
-					#print("piew")
-
-			if event.key==pygame.K_LSHIFT:
-				if laserammo > 0:
-					bullets.append(Bullet(x,y,2,angle))
-					pygame.mixer.Sound.play(lasersound)
-				#print("piew")
-				
-
-			if event.key==pygame.K_d:
-				anglev=anglev-1
-
-
-			if event.key == pygame.K_w:
-				vx += math.sin(angle*3.1415/180 +3.1415) 
-				vy += math.cos(angle*3.1415/180+3.1415) 
-
-
-	x += vx
-	y += vy
-
-	if x-shiprect[2]>width:
-		x = 0 - shiprect[1]
-	if x+shiprect[2]<0:
-		x = width
-	if y>height:
-		y = 0 - shiprect[3]
-	if y<0-shiprect[3]:
-		y = height
+def main():
+	global mainloop,health,angle,anglev,x,y,vx,vy,laserammo,normalammo,height,width,asteroids_list,bullets,consumables_list,shiprect,screen
+	while mainloop==True:
 		
-	#print(bullets)
-	old=shiprect.center
-	new_ship=pygame.transform.rotate(ship,angle)
-	shiprect = new_ship.get_rect()
-	shiprect.center=old
+		time.sleep(1/FPS)
+		angle=angle+anglev
+
+		if health > 100: health = 100
+		if health <= 0:
+			mainloop=False
+			sys.exit()
+		
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT: 
+				mainloop=False
+				sys.exit()
+			if event.type == pygame.KEYDOWN:
+				
+				if event.key==pygame.K_ESCAPE:
+					mainloop=False
+					sys.exit()
+
+				if event.key==pygame.K_a:
+					print("key a")
+					anglev=anglev+1
+
+				if event.key==pygame.K_SPACE:
+					if normalammo > 0:
+						bullets.append(Bullet(x,y,1,angle))
+						pygame.mixer.Sound.play(pew)
+
+				if event.key==pygame.K_LSHIFT:
+					if laserammo > 0:
+						bullets.append(Bullet(x,y,2,angle))
+						pygame.mixer.Sound.play(lasersound)
+					
+
+				if event.key==pygame.K_d:
+					anglev=anglev-1
 
 
+				if event.key == pygame.K_w:
+					vx += math.sin(angle*3.1415/180 +3.1415) 
+					vy += math.cos(angle*3.1415/180+3.1415) 
 
 
-	screen.fill(black)
+		x += vx
+		y += vy
+
+		if x-shiprect[2]>width:
+			x = 0 - shiprect[1]
+		if x+shiprect[2]<0:
+			x = width
+		if y>height:
+			y = 0 - shiprect[3]
+		if y<0-shiprect[3]:
+			y = height
+
+		old=shiprect.center
+		new_ship=pygame.transform.rotate(ship,angle)
+		shiprect = new_ship.get_rect()
+		shiprect.center=old
+
+		screen.fill(black)
+
+		screen.blit(text,(width/2,height/2))
+
+		for aster in asteroids_list:
+			aster.collisiondetect()
+			aster.move()
+			aster.draw()
+
+		for bullet in bullets:
+			bullet.checkdelete()
+			if bullets.count(bullet):
+				bullet.move()
+				bullet.draw()
+
+		for consumable in consumables_list:
+			consumable.collisiondetect()
+			consumable.draw()
+
+		screen.blit(new_ship, (x,y))
+		pygame.display.update()
 
 
-	screen.blit(text,(width/2,height/2))
-
-	for aster in asteroids_list:
-		aster.collisiondetect()
-		aster.move()
-		aster.draw()
-
-	for bullet in bullets:
-		bullet.checkdelete()
-		if bullets.count(bullet):
-			bullet.move()
-			bullet.draw()
-
-	for consumable in consumables_list:
-		consumable.collisiondetect()
-		consumable.draw()
-
-
-	screen.blit(new_ship, (x,y))
-	pygame.display.update()
-
+main()
 pygame.quit()
 quit()
