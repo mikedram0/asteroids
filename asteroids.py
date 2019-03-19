@@ -273,6 +273,7 @@ while 1:
 	#old=shiprect.center
 	new_ship=pygame.transform.rotate(ship,angle)
 	shiprect = new_ship.get_rect()
+	shiprect.center = (x,y)
 	#shiprect.center=old
 
 
@@ -297,12 +298,12 @@ while 1:
 		consumable.draw()
 
 
-	shiprect = shiprect.move(x,y)
+	#shiprect = shiprect.move(x,y)
 
-	screen.blit(new_ship, (x,y))
-	#print(shiprect)
+	screen.blit(new_ship, shiprect)
+	print(shiprect)
 	print(angle)
-	#pygame.draw.rect(screen,white,shiprect,3)
+	pygame.draw.rect(screen,white,shiprect,3)
 	#pygame.draw.rect(screen,white,(0,0,30,30),3)
 
 	helathtext.set_text("Health: "+str(health),sysfont,white) 
