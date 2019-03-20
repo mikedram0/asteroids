@@ -38,13 +38,16 @@ asteroid_large = pygame.image.load("large.png")
 ammobox1 = pygame.image.load("ammo.png")
 ammobox2 = pygame.image.load("laser_ammo_image.png")
 healthpack = pygame.image.load("health_pck_img.png")
+space = pygame.image.load("space.png")
 
 astersize = {1:asteroid_small,2:asteroid_medium,3:asteroid_large}
 ammoboximage = {1:ammobox1 , 2:ammobox2 , 3:healthpack }
+bulletimage=  {1:bullet_img,2:laser_img}
 
 
 
 FPS=60
+DEBUG = False
 bullets=[]
 asteroids_list=[]
 consumables_list=[]
@@ -67,8 +70,16 @@ class Player:
 		self.angle = 0
 		self.anglev = 0
 		self.rect = self.image.get_rect()
+		self.thrust = False
 
 	def move(self):
+
+		if self.thrust:
+			self.ax = math.sin(self.angle*3.1415/180 +3.1415) * 0.1
+			self.ay = math.cos(self.angle*3.1415/180+3.1415) * 0.1
+		else:
+			self.ax = 0
+			self.ay = 0
 
 		self.vx += self.ax
 		self.vy += self.ay
@@ -81,14 +92,14 @@ class Player:
 		if self.angle >= 360:
 			self.angle -= (self.angle%360)*360
 
-		if self.x-self.rect[2]>width:
-			self.x = 0 - self.rect[2]
-		if self.x+ self.rect[2]<0:
-			self.x = width
-		if self.y>height:
-			self.y = 0 - self.rect[3]
-		if self.y<0-self.rect[3]:
-			self.y = height
+		if self.x-self.rect.width/2>width:
+			self.x = 0 - self.rect.width/2
+		if self.x+ self.rect.width/2<0:
+			self.x = width + self.rect.width/2
+		if self.y - self.rect.height/2>height:
+			self.y = 0 - self.rect.height/2
+		if self.y + self.rect.height/2<0:
+			self.y = height + self.rect.height/2
 
 
 	def healthcheck(self):
@@ -101,6 +112,7 @@ class Player:
 		self.rect = self.newimage.get_rect()
 		self.rect.center = (self.x,self.y)
 		screen.blit(self.newimage,self.rect)
+		if DEBUG: pygame.draw.rect(screen,white,self.rect,3)
 
 
 
@@ -134,7 +146,8 @@ class Consumables:
 		self.bbox = self.image.get_rect()
 
 	def collisiondetect(self):
-		if player1.x > self.x and player1.x < self.x + self.bbox[2] and player1.y > self.y and player1.y < self.y + self.bbox[3]:
+		#if player1.x > self.x and player1.x < self.x + self.bbox[2] and player1.y > self.y and player1.y < self.y + self.bbox[3]:
+		if self.bbox.colliderect(player1.rect):
 			if self.type == 1: player1.normalammo += 10
 			if self.type == 2: player1.laserammo += 5
 			if self.type == 3: player1.health += 20
@@ -142,7 +155,10 @@ class Consumables:
 			consumables_list.remove(self)
 
 	def draw(self):
-		screen.blit(self.image, (self.x,self.y))
+		self.bbox.center = (self.x,self.y)
+		screen.blit(self.image, self.bbox)
+		if DEBUG: pygame.draw.rect(screen,white,self.bbox,3)
+
 
 
 class asteroid:
@@ -154,25 +170,30 @@ class asteroid:
 		
 		self.size = size
 		self.image = astersize[self.size]
+
 		self.bbox = self.image.get_rect()
+		self.bbox.center = (self.aposx,self.aposy)
 
 	def collisiondetect(self):
 		global health
 		for bullet in bullets:
-			if bullet.bposx > self.aposx and bullet.bposx < self.aposx + self.bbox[2] and bullet.bposy > self.aposy and bullet.bposy < self.aposy + self.bbox[3]:
+			if self.bbox.colliderect(bullet.bbox):
+			#if bullet.bposx > self.aposx and bullet.bposx < self.aposx + self.bbox[2] and bullet.bposy > self.aposy and bullet.bposy < self.aposy + self.bbox[3]:
 				asteroids_list.remove(self)
 				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
 				if self.size > 1 and bullet.type == 1:
 					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
 					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
-		if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
+		if self.bbox.colliderect(player1.rect):
+		#if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
 			player1.health -= self.size*10
 			asteroids_list.remove(self)
 			pygame.mixer.Sound.play(breaksound)
 	def move(self):
 		self.aposx=self.aposx+self.avx
 		self.aposy=self.aposy+self.avy
+		'''
 		if self.aposx>width:
 			self.aposx = 0
 		if self.aposx<0:
@@ -181,9 +202,21 @@ class asteroid:
 			self.aposy = 0 
 		if self.aposy<0:
 			self.aposy = height
+			'''
+
+		if self.aposx-self.bbox.width/2>width:
+			self.aposx = 0 - self.bbox.width/2
+		if self.aposx+ self.bbox.width/2<0:
+			self.aposx = width + self.bbox.width/2
+		if self.aposy - self.bbox.height/2>height:
+			self.aposy = 0 - self.bbox.height/2
+		if self.aposy + self.bbox.height/2<0:
+			self.aposy = height + self.bbox.height/2
 		
 	def draw(self):
-		screen.blit(self.image, (self.aposx,self.aposy))
+		self.bbox.center = (self.aposx,self.aposy)
+		screen.blit(self.image, self.bbox)
+		if DEBUG: pygame.draw.rect(screen,white,self.bbox,3)
 
 
 
@@ -196,6 +229,8 @@ class Bullet:
 		self.bvx=math.sin(player1.angle*3.1415/180 +3.1415) 
 		self.bvy=math.cos(player1.angle*3.1415/180+3.1415)
 		self.type = typee # Type of Bullet , 1 is a normal bullet , 2 is a laser
+		self.image = bulletimage[self.type]
+		self.bbox = self.image.get_rect()
 		if self.type == 1: player1.normalammo -= 1
 		if self.type == 2: player1.laserammo -= 1
 
@@ -210,13 +245,17 @@ class Bullet:
 		
 		
 		if self.type==1:
-			screen.blit(bullet_img, (self.bposx,self.bposy))
+			self.bbox = self.image.get_rect()
+			self.bbox.center = (self.bposx,self.bposy)
+			screen.blit(self.image,self.bbox)
+			if DEBUG: pygame.draw.rect(screen,white,self.bbox,3)
 
 		if self.type==2:
 			self.new_l=pygame.transform.rotate(laser_img,self.angle)
-			rect = self.new_l.get_rect()
-			rect.center = (self.bposx,self.bposy)
-			screen.blit(self.new_l, rect)
+			self.bbox = self.new_l.get_rect()
+			self.bbox.center = (self.bposx,self.bposy)
+			screen.blit(self.new_l,self.bbox)
+			if DEBUG: pygame.draw.rect(screen,white,self.bbox,3)
 		
 	def move(self):
 		self.bposx=self.bposx+self.bvx*20
@@ -227,18 +266,21 @@ class Bullet:
 for i in range(5):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
 
-for i in range(10):
+for i in range(5):
 	consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
 
 
 helathtext = Text()
 ammo1text = Text()
 ammo2text = Text()
+DEBUGtext = Text()
 
 player1=Player(width/2,height/2)
 
 
 def main():
+
+	global DEBUG
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: 
@@ -247,6 +289,9 @@ def main():
 			
 			if event.key==pygame.K_ESCAPE:
 				sys.exit()
+
+			if event.key==pygame.K_RETURN:
+				DEBUG = not DEBUG
 
 			if event.key==pygame.K_a:
 				player1.anglev=player1.anglev+2
@@ -269,8 +314,9 @@ def main():
 
 			if event.key == pygame.K_w:
 				player1.image = ship2
-				player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
-				player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
+				player1.thrust = True
+				#player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
+				#player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
 				pygame.mixer.Sound.play(thrustsound,-1)
 
 				
@@ -284,14 +330,14 @@ def main():
 
 			if event.key == pygame.K_w:
 				player1.image = ship1
-				player1.ax = 0
-				player1.ay = 0
+				player1.thrust = False
 				pygame.mixer.Sound.stop(thrustsound)
 
 
 
 	clock.tick(FPS)
 	screen.fill(black)
+	#screen.blit(space,(0,0,width,height))
 
 	for aster in asteroids_list:
 		aster.collisiondetect()
@@ -311,16 +357,17 @@ def main():
 	player1.healthcheck()
 	player1.move()
 	player1.draw()
-	pygame.draw.rect(screen,white,player1.rect,3)
+	
 
-	#helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
-	helathtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(clock.get_fps()),sysfont,white) 
+	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
+	DEBUGtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(clock.get_fps()),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
 	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
 
 	helathtext.draw(width/100,10) 
 	ammo1text.draw(width/100,40) 
 	ammo2text.draw(width/100,70) 
+	if DEBUG: DEBUGtext.draw(width/100,100)
 	pygame.display.update()
 
 
