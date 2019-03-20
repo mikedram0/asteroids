@@ -31,6 +31,11 @@ pygame.mixer.pre_init(44100,-16,1, 1024)
 laser_img=pygame.image.load("laser.png")
 ship1 = pygame.image.load("starship.png")
 ship2 = pygame.image.load("starship2.png")
+
+#ship1 = pygame.transform.scale(ship1,(50,50))
+#ship2 = pygame.transform.scale(ship2,(70,70))
+
+
 bullet_img = pygame.image.load("bullet.png")
 asteroid_small = pygame.image.load("small.png")
 asteroid_medium = pygame.image.load("medium.png")
@@ -146,7 +151,6 @@ class Consumables:
 		self.bbox = self.image.get_rect()
 
 	def collisiondetect(self):
-		#if player1.x > self.x and player1.x < self.x + self.bbox[2] and player1.y > self.y and player1.y < self.y + self.bbox[3]:
 		if self.bbox.colliderect(player1.rect):
 			if self.type == 1:
 				player1.normalammo += 10
@@ -158,7 +162,6 @@ class Consumables:
 				player1.health += 20
 				consumables_list.remove(self)
 
-			#consumables_list.remove(self)
 
 	def draw(self):
 		self.bbox.center = (self.x,self.y)
@@ -184,34 +187,22 @@ class asteroid:
 		global health
 		for bullet in bullets:
 			if self.bbox.colliderect(bullet.bbox):
-			#if bullet.bposx > self.aposx and bullet.bposx < self.aposx + self.bbox[2] and bullet.bposy > self.aposy and bullet.bposy < self.aposy + self.bbox[3]:
 				asteroids_list.remove(self)
 				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
 				if self.size > 1 and bullet.type == 1:
-					velx = random.choice([-1,1])
-					vely = random.choice([-1,1])
+					velx = self.avx+random.choice([-1,1])
+					vely = self.avy+random.choice([-1,1])
 					asteroids_list.append(asteroid(self.aposx,self.aposy,velx,vely,self.size-1))
 					asteroids_list.append(asteroid(self.aposx,self.aposy,-velx,-vely,self.size-1))
 		if self.bbox.colliderect(player1.rect):
-		#if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
 			player1.health -= self.size*10
 			asteroids_list.remove(self)
 			pygame.mixer.Sound.play(breaksound)
 	def move(self):
 		self.aposx=self.aposx+self.avx
 		self.aposy=self.aposy+self.avy
-		'''
-		if self.aposx>width:
-			self.aposx = 0
-		if self.aposx<0:
-			self.aposx = width
-		if self.aposy>height:
-			self.aposy = 0 
-		if self.aposy<0:
-			self.aposy = height
-			'''
-
+		
 		if self.aposx-self.bbox.width/2>width:
 			self.aposx = 0 - self.bbox.width/2
 		if self.aposx+ self.bbox.width/2<0:
@@ -243,7 +234,7 @@ class Bullet:
 		if self.type == 2: player1.laserammo -= 1
 
 
-	   # self.fire()
+	   
 
 	def checkdelete(self):
 		if self.bposx >width or self.bposx<0 or self.bposy > height or self.bposy < 0:
