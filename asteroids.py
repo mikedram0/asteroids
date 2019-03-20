@@ -326,5 +326,6 @@ def secondary():
 
 while 1:
 	main()
+	
 pygame.quit()
 quit()
