@@ -128,7 +128,8 @@ class Player:
 	def healthcheck(self):
 
 		if self.health > 100 : self.health = 100
-		if self.health <= 0 : sys.exit()
+		if self.health <= 0 : 
+			gamereset()
 
 	def draw(self):
 		self.newimage=pygame.transform.rotate(self.image,player1.angle)
@@ -205,7 +206,7 @@ class asteroid:
 		global health
 		for bullet in bullets:
 			if self.bbox.colliderect(bullet.bbox):
-				player1.score=+10*self.size
+				player1.score+=10*self.size
 				asteroids_list.remove(self)
 				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
@@ -288,7 +289,8 @@ class Bullet:
 def spawn():
 	global DEBUG,diff
 	player1.score=player1.score*2
-	for i in range(5*diff):
+	#consumables_list=[]
+	for i in range(3*diff):
 		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(-1,1),random.randint(-1,1),random.randint(1,3)   ))
 
 	for i in range(5):
@@ -312,9 +314,10 @@ player1=Player(width/2,height/2)
 
 def main():
 
-	global DEBUG,diff
+	global DEBUG,diff,consumables_list
 	if asteroids_list==[]:
 		diff=diff+1
+		consumables_list=[]
 		spawn()
 	
 	player1.time = time.time() - start_time
@@ -371,8 +374,13 @@ def main():
 
 
 
+
+	player1.healthcheck()
 	clock.tick(FPS)
 	screen.fill(black)
+	player1.move()
+	player1.draw()
+
 	#screen.blit(space,(0,0,width,height))
 
 	for aster in asteroids_list:
@@ -390,16 +398,11 @@ def main():
 		consumable.collisiondetect()
 		consumable.draw()
 
-	player1.healthcheck()
-	player1.move()
-	player1.draw()
-	
-
 	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
 	DEBUGtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(int(clock.get_fps()))+" vx: "+str(int(player1.vx))+" vy: "+str(int(player1.vy))+" time: "+str(int(player1.time)),sysfont,white) 
 	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
 	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
-	scoretext.set_text("Score: "+str(player1.score),sysfont,white)
+	scoretext.set_text("Score: "+str(player1.score)+" Level: "+str(diff),sysfont,white)
 
 	helathtext.draw(width/100,10) 
 	ammo1text.draw(width/100,40) 
@@ -407,6 +410,18 @@ def main():
 	scoretext.draw(width/100,100)
 	if DEBUG: DEBUGtext.draw(width/100,130)
 	pygame.display.update()
+
+
+def gamereset():
+	global consumables_list,player1,diff
+	diff=1
+	bullets=[]
+	asteroids_list=[]
+	consumables_list=[]
+	textlist = []
+	del player1
+	player1=Player(width/2,height/2)
+	print(player1.score)
 
 
 spawn()
