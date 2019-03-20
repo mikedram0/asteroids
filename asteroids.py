@@ -3,8 +3,8 @@ import pygame
 import time
 import math
 import random
-import threading
-from multiprocessing import Process
+import time
+
 
 pygame.init()
 
@@ -59,6 +59,8 @@ asteroids_list=[]
 consumables_list=[]
 textlist = []
 
+start_time = time.time()
+
 
 class Player:
 
@@ -77,6 +79,11 @@ class Player:
 		self.anglev = 0
 		self.rect = self.image.get_rect()
 		self.thrust = False
+		self.score = 0
+		self.lose = False
+		self.limx = 30
+		self.limy = 30
+		self.time = 0
 
 	def move(self):
 
@@ -89,6 +96,16 @@ class Player:
 
 		self.vx += self.ax
 		self.vy += self.ay
+
+		
+		if abs(self.vx) >self.limx or abs(self.vy)>self.limy:
+			if self.vx > self.limx: self.vx = self.limx
+			if self.vx <-self.limx: self.vx = -self.limx
+			if self.vy > self.limy: self.vy = self.limy
+			if self.vy <-self.limy: self.vy = -self.limy
+
+
+
 
 		self.x += self.vx
 		self.y += self.vy
@@ -111,7 +128,7 @@ class Player:
 	def healthcheck(self):
 
 		if self.health > 100 : self.health = 100
-		if self.health <= 0 : sys.exit()
+		if self.health <= 0 : self.lose = True
 
 	def draw(self):
 		self.newimage=pygame.transform.rotate(self.image,player1.angle)
@@ -192,8 +209,8 @@ class asteroid:
 				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
 				if self.size > 1 and bullet.type == 1:
-					velx = self.avx+random.choice([-1,1])
-					vely = self.avy+random.choice([-1,1])
+					velx = random.choice([-1,1])
+					vely = random.choice([-1,1])
 					asteroids_list.append(asteroid(self.aposx,self.aposy,velx,vely,self.size-1))
 					asteroids_list.append(asteroid(self.aposx,self.aposy,-velx,-vely,self.size-1))
 		if self.bbox.colliderect(player1.rect):
@@ -278,53 +295,14 @@ DEBUGtext = Text()
 player1=Player(width/2,height/2)
 
 
-def mainf():
+def main():
 
 	global DEBUG
 
-	secondary()
+	player1.time = time.time() - start_time
+	#print(time)
 
-	clock.tick(FPS)
-	screen.fill(black)
-	#screen.blit(space,(0,0,width,height))
-
-	for aster in asteroids_list:
-		aster.collisiondetect()
-		aster.move()
-		aster.draw()
-
-	for bullet in bullets:
-		bullet.checkdelete()
-		if bullets.count(bullet):
-			bullet.move()
-			bullet.draw()
-
-	for consumable in consumables_list:
-		consumable.collisiondetect()
-		consumable.draw()
-
-	player1.healthcheck()
-	player1.move()
-	player1.draw()
-	
-
-	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
-	DEBUGtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(clock.get_fps()),sysfont,white) 
-	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
-	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
-
-	helathtext.draw(width/100,10) 
-	ammo1text.draw(width/100,40) 
-	ammo2text.draw(width/100,70) 
-	if DEBUG: DEBUGtext.draw(width/100,100)
-	pygame.display.update()
-
-
-def secondary():
-	global DEBUG
-	print("secondary")
 	for event in pygame.event.get():
-		if DEBUG: print(event)
 		if event.type == pygame.QUIT: 
 			sys.exit()
 		if event.type == pygame.KEYDOWN:
@@ -357,8 +335,6 @@ def secondary():
 			if event.key == pygame.K_w:
 				player1.image = ship2
 				player1.thrust = True
-				#player1.ax = math.sin(player1.angle*3.1415/180 +3.1415) * 0.1
-				#player1.ay = math.cos(player1.angle*3.1415/180+3.1415) * 0.1 
 				pygame.mixer.Sound.play(thrustsound,-1)
 
 				
@@ -375,16 +351,45 @@ def secondary():
 				player1.thrust = False
 				pygame.mixer.Sound.stop(thrustsound)
 
-'''
-while 1:
-	#main()
-	t1=Process(target=main)
-	t1.start()
-'''
-if __name__ == '__main__':
-    p = Process(target=mainf)
-    p.start()
-    p.join()
 
+
+	clock.tick(FPS)
+	screen.fill(black)
+	#screen.blit(space,(0,0,width,height))
+
+	for aster in asteroids_list:
+		aster.collisiondetect()
+		aster.move()
+		aster.draw()
+
+	for bullet in bullets:
+		bullet.checkdelete()
+		if bullets.count(bullet):
+			bullet.move()
+			bullet.draw()
+
+	for consumable in consumables_list:
+		consumable.collisiondetect()
+		consumable.draw()
+
+	player1.healthcheck()
+	player1.move()
+	player1.draw()
+	
+
+	helathtext.set_text("Health: "+str(player1.health),sysfont,white) 
+	DEBUGtext.set_text("x: "+str(int(player1.x))+" y: "+str(int(player1.y))+" FPS: "+str(int(clock.get_fps()))+" vx: "+str(int(player1.vx))+" vy: "+str(int(player1.vy))+" time: "+str(int(player1.time)),sysfont,white) 
+	ammo1text.set_text("Bullets: "+str(player1.normalammo),sysfont,white) 
+	ammo2text.set_text("Lasers: "+str(player1.laserammo),sysfont,white) 
+
+	helathtext.draw(width/100,10) 
+	ammo1text.draw(width/100,40) 
+	ammo2text.draw(width/100,70) 
+	if DEBUG: DEBUGtext.draw(width/100,100)
+	pygame.display.update()
+
+
+while 1:
+	main()
 pygame.quit()
 quit()
