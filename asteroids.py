@@ -104,7 +104,7 @@ class Player:
 
 	def healthcheck(self):
 
-		if self.health > 100 : health = 100
+		if self.health > 100 : self.health = 100
 		if self.health <= 0 : sys.exit()
 
 	def draw(self):
@@ -148,11 +148,17 @@ class Consumables:
 	def collisiondetect(self):
 		#if player1.x > self.x and player1.x < self.x + self.bbox[2] and player1.y > self.y and player1.y < self.y + self.bbox[3]:
 		if self.bbox.colliderect(player1.rect):
-			if self.type == 1: player1.normalammo += 10
-			if self.type == 2: player1.laserammo += 5
-			if self.type == 3: player1.health += 20
+			if self.type == 1:
+				player1.normalammo += 10
+				consumables_list.remove(self)
+			if self.type == 2:
+				player1.laserammo += 5
+				consumables_list.remove(self)
+			if self.type == 3 and player1.health < 100: 
+				player1.health += 20
+				consumables_list.remove(self)
 
-			consumables_list.remove(self)
+			#consumables_list.remove(self)
 
 	def draw(self):
 		self.bbox.center = (self.x,self.y)
@@ -162,11 +168,11 @@ class Consumables:
 
 
 class asteroid:
-	def __init__(self,x,y,size):
+	def __init__(self,x,y,vx,vy,size):
 		self.aposx=x
 		self.aposy=y
-		self.avx=random.randint(-1,1)
-		self.avy=random.randint(-1,1)
+		self.avx=vx
+		self.avy=vy
 		
 		self.size = size
 		self.image = astersize[self.size]
@@ -183,8 +189,10 @@ class asteroid:
 				pygame.mixer.Sound.play(breaksound)
 				bullets.remove(bullet)
 				if self.size > 1 and bullet.type == 1:
-					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
-					asteroids_list.append(asteroid(self.aposx,self.aposy,self.size-1))
+					velx = random.choice([-1,1])
+					vely = random.choice([-1,1])
+					asteroids_list.append(asteroid(self.aposx,self.aposy,velx,vely,self.size-1))
+					asteroids_list.append(asteroid(self.aposx,self.aposy,-velx,-vely,self.size-1))
 		if self.bbox.colliderect(player1.rect):
 		#if player1.x > self.aposx and player1.x < self.aposx + self.bbox[2] and player1.y > self.aposy and player1.y < self.aposy + self.bbox[3]:            
 			player1.health -= self.size*10
@@ -264,7 +272,7 @@ class Bullet:
 
 
 for i in range(5):
-		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(1,3)   ))
+		asteroids_list.append(asteroid(random.randint(0,width),random.randint(0,height),random.randint(-1,1),random.randint(-1,1),random.randint(1,3)   ))
 
 for i in range(5):
 	consumables_list.append(Consumables(random.randint(0,width),random.randint(0,height),random.randint(1,3)))
